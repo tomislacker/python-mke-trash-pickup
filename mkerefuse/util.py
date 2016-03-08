@@ -56,7 +56,7 @@ class XPathObject(LogProducer):
 
     @classmethod
     def FromHTML(cls, html_contents):
-        log = LogProducer.__init__(cls)
+        log = logging.getLogger(cls.__name__)
         inst = cls()
         log.info("Reading through {b} bytes for {c} properties...".format(
             b=len(html_contents),
