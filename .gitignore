@@ -73,3 +73,6 @@ lib64
 /man/man1/nosetests.1
 cover/
 share/
+
+# iPython/Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
