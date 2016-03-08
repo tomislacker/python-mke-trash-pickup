@@ -3,6 +3,8 @@ from lxml import html
 
 
 class XPathObject(object):
+    """Helper for importing response [X]HTML into a class instance"""
+
     input_properties = {}
     """Dict of keys (property names) and XPaths (to read vals from)"""
 
