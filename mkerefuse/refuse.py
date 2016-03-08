@@ -15,6 +15,9 @@ class RefusePickup(XPathObject):
     }
     """Maps the key to an attr name & value to an XPath lookup"""
 
+    pickup_time = '0700'
+    """Define what time the refuse must be outside by to make pickup time"""
+
 
 class RefuseQueryAddress(object):
     """Defines an address to query for refuse pickup scheduling"""
