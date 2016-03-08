@@ -1,3 +1,4 @@
+import requests
 from .util import XPathObject
 
 
@@ -76,3 +77,34 @@ class RefuseQueryAddress(object):
     @property
     def street_type(self):
         return self._street_type.upper()
+
+
+class RefuseQuery(object):
+    """Queries for garbage/recycle pickups based on an address"""
+
+    form_url = 'http://mpw.milwaukee.gov/services/garbage_day'
+    """URL to POST form data to"""
+
+    parse_xpath = RefusePickup
+    """Class to parse XHTML response with"""
+
+    @classmethod
+    def Execute(cls, refuse_address):
+        """Queries the form URL & processes the response
+
+        :param refuse_address: Address to lookup
+        :type refuse_address: RefuseQueryAddress
+        :return: Parsed response
+        :rtype: mkerefuse.refuse.RefusePickup
+        """
+        response = requests.post(
+            cls.form_url,
+            data={
+                'laddr': refuse_address.house_number,
+                'sdir': refuse_address.direction,
+                'sname': refuse_address.street_name,
+                'stype': refuse_address.street_type,
+                'Submit': 'Submit',
+            })
+        response_method = getattr(cls.parse_xpath, 'FromHTML')
+        return response_method(response.text)
