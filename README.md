@@ -4,15 +4,14 @@ I'm lazy.
 
 ## Usage
 ### Typical
-
-```sh
-# Show something here
-```
+*See [Usage.ipynb](Usage.ipynb)*
 
 ### Development Setup
 
 ```sh
-# Show something else here
+make dev
+venv/bin/pip3 install jupyter
+venv/bin/jupyter notebook
 ```
 
 ## Technical Details
