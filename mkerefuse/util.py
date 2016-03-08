@@ -12,7 +12,7 @@ DEFAULT_LOGGING_CONFIG = {
 }
 
 
-class XPathObject(object):
+class XPathObject(LogProducer):
     """Helper for importing response [X]HTML into a class instance"""
 
     input_properties = {}
@@ -20,21 +20,22 @@ class XPathObject(object):
 
     @classmethod
     def FromHTML(cls, html_contents):
+        log = LogProducer.__init__(cls)
         inst = cls()
-        print("Reading through {b} bytes for {c} properties...".format(
+        log.info("Reading through {b} bytes for {c} properties...".format(
             b=len(html_contents),
             c=len(cls.input_properties)))
 
         tree = html.fromstring(html_contents)
 
         for attr_name, xpath in cls.input_properties.items():
-            print("Searching for '{n}': {x}".format(
+            log.debug("Searching for '{n}': {x}".format(
                 n=attr_name,
                 x=xpath))
             elements = tree.xpath(xpath)
 
             if not len(elements):
-                print("Failed to find '{n}': {x}".format(
+                log.warn("Failed to find '{n}': {x}".format(
                     n=attr_name,
                     x=xpath))
                 continue
