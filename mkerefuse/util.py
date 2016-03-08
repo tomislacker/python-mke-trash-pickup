@@ -30,10 +30,8 @@ def setup_logging(
             config = yaml.load(yaml_file.read())
 
         logging.config.dictConfig(config)
-        logging.debug("Setup logging from '{}'".format(config_path))
 
     else:
-        logging.debug("Setup logging from defaults")
         logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
 
 
