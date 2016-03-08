@@ -1,0 +1,29 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: simple
+        stream: ext://sys.stdout
+
+    debug:
+        class: logging.FileHandler
+        filename: wanrefuse.debug.log
+        formatter: simple
+        level: DEBUG
+
+    daemonlog:
+        class: logging.FileHandler
+        filename: wanrefuse.log
+        formatter: simple
+        level: INFO
+
+root:
+    level: DEBUG
+    handlers: [console,daemonlog,debug]
