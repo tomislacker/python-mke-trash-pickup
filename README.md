@@ -4,6 +4,38 @@ I'm lazy.
 
 ## Usage
 ### Typical
+
+```sh
+$ python setup.py install
+$ mkerefusecheck \
+    --address 2727 \
+    --direction S \
+    --street 27th \
+    --street-type st
+2016-04-14 20:23:19 - mke-refuse - DEBUG - Parsing arguments
+2016-04-14 20:23:19 - mke-refuse - DEBUG - Composing query address
+2016-04-14 20:23:19 - mke-refuse - INFO - Executing query...
+2016-04-14 20:23:19 - requests.packages.urllib3.connectionpool - INFO - Starting new HTTP connection (1): mpw.milwaukee.gov
+2016-04-14 20:23:19 - requests.packages.urllib3.connectionpool - DEBUG - "POST /services/garbage_day HTTP/1.1" 200 None
+2016-04-14 20:23:19 - RefusePickup - INFO - Reading through 14152 bytes for 6 properties...
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_after': //*[@id="nConf"]/strong[4]
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'route_recyle': //*[@id="nConf"]/strong[3]
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_before': //*[@id="nConf"]/strong[5]
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'success_msg': //*[@id="nConf"]/h1
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'route_garbage': //*[@id="nConf"]/strong[1]
+2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_garbage': //*[@id="nConf"]/strong[2]
+2016-04-14 20:23:19 - mke-refuse - INFO - Query returned
+{
+    "next_pickup_recycle_after": "TUESDAY MAY 3, 2016",
+    "route_recyle": "SR01-3-07",
+    "route_garbage": "SP1-3A",
+    "success_msg": "2727 S 27TH ST - Address located!",
+    "next_pickup_recycle_before": "May 9th - May 13th",
+    "next_pickup_garbage": "TUESDAY APRIL 19, 2016"
+}
+```
+
+### Advanced
 *See [Usage.ipynb](Usage.ipynb)*
 
 ### Development Setup
