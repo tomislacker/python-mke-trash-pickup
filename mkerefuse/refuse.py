@@ -24,7 +24,7 @@ class RefuseQueryAddress(object):
 
     STREET_TYPES = [
         'AV', # Avenue
-        'BL', #
+        'BL', # Boulevard
         'CR', # Circle
         'CT', # Court
         'DR', # Drive
