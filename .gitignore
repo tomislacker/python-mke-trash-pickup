@@ -76,3 +76,6 @@ share/
 
 # iPython/Jupyter Notebook Checkpoints
 .ipynb_checkpoints/
+
+# Ignore compiled zips for Lambda
+/*.zip
