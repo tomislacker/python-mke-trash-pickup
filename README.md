@@ -72,3 +72,8 @@ curl \
     -d 'laddr=2727&sdir=S&sname=27TH&stype=ST&Submit=Submit' \
     http://mpw.milwaukee.gov/services/garbage_day
 ```
+
+## References
+### Building Libraries for Lambda
+- [[azavea.com] Using Python's LXML in Amazon Lambda](https://www.azavea.com/blog/2016/06/27/using-python-lxml-amazon-lambda/)
+- [[stackoverflow.com] Use LXML on AWS Lambda](http://stackoverflow.com/questions/36387664/use-lxml-on-aws-lambda)
