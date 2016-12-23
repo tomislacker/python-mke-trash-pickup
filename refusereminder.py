@@ -42,7 +42,6 @@ def notify_pickup_change(pickup, sns_topic):
     """
     Produces a notification for a garbage pickup change
     """
-    print("Notifying SNS: {}".format(sns_topic.arn))
 
     notify_msg = """
 Garbage: {garbage}
@@ -53,10 +52,12 @@ Recycle (Before): {recycle_before}""".format(
         recycle_before=pickup.next_pickup_recycle_before).strip()
 
     print("\n{}\n".format(notify_msg))
-    return
+
+    print("Notifying SNS: {}".format(sns_topic.arn))
     sns_topic.publish(
         Subject='Garbage Day Update',
         Message=notify_msg)
+    print("Message published to SNS!")
 
 
 def lambda_handler(event, context):
