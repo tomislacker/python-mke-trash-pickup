@@ -79,3 +79,7 @@ share/
 
 # Ignore compiled zips for Lambda
 /*.zip
+
+# Ignore compiled dependencies
+/site-packages/
+/site-packages-64/
