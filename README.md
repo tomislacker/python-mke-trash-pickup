@@ -3,6 +3,34 @@ That's what I wanted to know.  And no, I didn't want to go look it up because
 I'm lazy.
 
 ## Usage
+### CloudFormation
+
+**Important:** To build the [lxml](http://lxml.de/) library for deployment
+to AWS Lambda, a Docker container will be employed during the `make ldist`
+target.
+
+```sh
+# Create the S3 bucket, build the code, deploy to S3
+make s3-bucket ldist s3-deploy
+
+# Create the CloudFormation stack
+make cloud \
+    ADDRESS_NUM=2727 \
+    ADDRESS_DIR=S \
+    STREET_NAME=27th \
+    STREET_TYPE=ST
+
+# Now you'll have an SNS topic created that you can go subscribe
+# to for any updates that occur to your collection schedule.
+```
+
+**Other Variables**
+
+| Name | Default | Description |
+| `STACK_NAME` | `mke-trash-pickup` | CloudFormation stack name |
+| `DEPLOY_BUCKET` | `mke-trash-pickup-12241` | S3 bucket for .zip deployment (Must be changed) |
+| `LAMBDA_FREQ` | `12 hours` | How often the the scheduled event will check for changes |
+
 ### Typical
 
 ```sh
@@ -72,3 +100,8 @@ curl \
     -d 'laddr=2727&sdir=S&sname=27TH&stype=ST&Submit=Submit' \
     http://mpw.milwaukee.gov/services/garbage_day
 ```
+
+## References
+### Building Libraries for Lambda
+- [[azavea.com] Using Python's LXML in Amazon Lambda](https://www.azavea.com/blog/2016/06/27/using-python-lxml-amazon-lambda/)
+- [[stackoverflow.com] Use LXML on AWS Lambda](http://stackoverflow.com/questions/36387664/use-lxml-on-aws-lambda)

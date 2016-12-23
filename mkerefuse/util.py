@@ -83,14 +83,16 @@ class XPathObject(LogProducer):
 
         return inst
 
-    def __repr__(self):
+    def to_dict(self):
         response_dict = {}
         for key, value in self.input_properties.items():
             response_dict.update({
                 key: getattr(self, key),
             })
+        return response_dict
 
+    def __repr__(self):
         return json.dumps(
-            response_dict,
+            self.to_dict(),
             indent=4,
             separators=(',', ': '))
