@@ -6,6 +6,7 @@ STACK_NAME := mke-trash-pickup
 DEPLOY_BUCKET := mke-trash-pickup-12241
 LAMBDA_NAME := check-garbage-day
 LAMBDA_HANDLER := refusereminder
+LAMBDA_FREQ := 12 hours
 
 BUILD_CONTAINER_NAME := mke-trash-pickup_libs
 BUILD_CONTAINER_IMAGE := amazonlinux:latest
@@ -73,7 +74,8 @@ cloud  :
 			ParameterKey=AddressNumber,ParameterValue=$(ADDRESS_NUM) \
 			ParameterKey=AddressDirection,ParameterValue=$(ADDRESS_DIR) \
 			ParameterKey=StreetName,ParameterValue=$(STREET_NAME) \
-			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE)
+			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE) \
+			ParameterKey=Frequency,ParameterValue='$(LAMBDA_FREQ)'
 
 .PHONY       : cloud-update
 cloud-update :
@@ -89,7 +91,8 @@ cloud-update :
 			ParameterKey=AddressNumber,ParameterValue=$(ADDRESS_NUM) \
 			ParameterKey=AddressDirection,ParameterValue=$(ADDRESS_DIR) \
 			ParameterKey=StreetName,ParameterValue=$(STREET_NAME) \
-			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE)
+			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE) \
+			ParameterKey=Frequency,ParameterValue='$(LAMBDA_FREQ)'
 
 .PHONY       : cloud-delete
 cloud-delete :

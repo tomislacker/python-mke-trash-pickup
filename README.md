@@ -24,6 +24,13 @@ make cloud \
 # to for any updates that occur to your collection schedule.
 ```
 
+**Other Variables**
+
+| Name | Default | Description |
+| `STACK_NAME` | `mke-trash-pickup` | CloudFormation stack name |
+| `DEPLOY_BUCKET` | `mke-trash-pickup-12241` | S3 bucket for .zip deployment (Must be changed) |
+| `LAMBDA_FREQ` | `12 hours` | How often the the scheduled event will check for changes |
+
 ### Typical
 
 ```sh

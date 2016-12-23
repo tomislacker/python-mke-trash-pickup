@@ -16,6 +16,11 @@ Parameters:
     Type: String
     Default: mke-trash-pickup
 
+  Frequency:
+    Type: String
+    Default: '12 hours'
+    Description: 'See here for details: http://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html'
+
   AddressNumber:
     Type: String
 
@@ -112,3 +117,50 @@ Resources:
     Properties:
       TopicName:
         Ref: SNSTopicName
+
+  EventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      ScheduleExpression: "rate(12 hours)"
+      ScheduleExpression:
+        'Fn::Join':
+          - ''
+          - - 'rate('
+            - Ref: Frequency
+            - ')'
+
+      Targets:
+        - Id: GarbageCheckScheduler
+          Arn:
+            'Fn::GetAtt':
+              - LambdaJob
+              - Arn
+          Input:
+            'Fn::Join':
+              - ''
+              - - '{'
+                - '"s3_bucket": "'
+                - Ref: DataBucket
+                - '", "house_number": "'
+                - Ref: AddressNumber
+                - '", "direction": "'
+                - Ref: AddressDirection
+                - '", "street_name": "'
+                - Ref: StreetName
+                - '", "street_type": "'
+                - Ref: StreetType
+                - '" }'
+
+  InvokeLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName:
+        'Fn::GetAtt':
+          - LambdaJob
+          - Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn:
+        'Fn::GetAtt':
+          - EventRule
+          - Arn
