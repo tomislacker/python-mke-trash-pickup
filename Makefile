@@ -1,7 +1,9 @@
 PYTHON_VERSION := 2
 PIP_VERSION := $(PYTHON_VERSION)
 VENV_DIR := venv
-LDIST_ZIP := $(shell readlink -m lambda-upload.zip)
+LDIST_ZIP := $(shell readlink -m mke-trash-pickup.zip)
+STACK_NAME := mke-trash-pickup
+DEPLOY_BUCKET := mke-trash-pickup-12241
 LAMBDA_NAME := check-garbage-day
 LAMBDA_HANDLER := refusereminder
 
@@ -45,26 +47,51 @@ ldist  : site-packages
 	cd site-packages-64 && zip -r $(LDIST_ZIP) *
 	cd site-packages && zip -r $(LDIST_ZIP) *
 
-.PHONY            : lambda-job-create
-lambda-job-create : ldist
-	 @echo Uploading $(shell basename $(LDIST_ZIP))
-	 @aws lambda create-function \
-		 --function-name $(LAMBDA_NAME) \
-		 --zip-file fileb://$(LDIST_ZIP) \
-		 --handler $(LAMBDA_HANDLER).lambda_handler \
-		 --runtime python2.7 \
-		 --role arn:aws:iam::097270082659:role/lambdainvoke \
-		 --timeout 15 \
-		 --memory-size 128
+.PHONY    : s3-bucket
+s3-bucket :
+	aws s3 mb s3://$(DEPLOY_BUCKET)
 
-.PHONY            : lambda-job-delete
-lambda-job-delete :
-	aws lambda delete-function \
-		--function-name $(LAMBDA_NAME)
+.PHONY           : s3-bucket-delete
+s3-bucket-delete :
+	aws s3 rm s3://$(DEPLOY_BUCKET) --force
 
-.PHONY            : lambda-job-update
-lambda-job-update : ldist
-	 @echo Uploading $(LDIST_ZIP)
-	 @aws lambda update-function-code \
-		 --function-name $(LAMBDA_NAME) \
-		 --zip-file fileb://$(LDIST_ZIP)
+.PHONY    : s3-deploy
+s3-deploy :
+	aws s3 cp $(LDIST_ZIP) s3://$(DEPLOY_BUCKET)/$(shell basename $(LDIST_ZIP))
+
+.PHONY : cloud
+cloud  :
+	aws cloudformation create-stack \
+		--stack-name $(STACK_NAME) \
+		--template-body file://cloudformation.yml \
+		--capabilities CAPABILITY_IAM \
+		--parameters \
+			ParameterKey=DeployBucketName,ParameterValue=$(DEPLOY_BUCKET) \
+			ParameterKey=DeployKeyName,ParameterValue=$(shell basename $(LDIST_ZIP)) \
+			ParameterKey=LambdaHandler,ParameterValue=$(LAMBDA_HANDLER).lambda_handler \
+			ParameterKey=SNSTopicName,ParameterValue=mke-trash-pickup \
+			ParameterKey=AddressNumber,ParameterValue=$(ADDRESS_NUM) \
+			ParameterKey=AddressDirection,ParameterValue=$(ADDRESS_DIR) \
+			ParameterKey=StreetName,ParameterValue=$(STREET_NAME) \
+			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE)
+
+.PHONY       : cloud-update
+cloud-update :
+	aws cloudformation update-stack \
+		--stack-name $(STACK_NAME) \
+		--template-body file://cloudformation.yml \
+		--capabilities CAPABILITY_IAM \
+		--parameters \
+			ParameterKey=DeployBucketName,ParameterValue=$(DEPLOY_BUCKET) \
+			ParameterKey=DeployKeyName,ParameterValue=$(shell basename $(LDIST_ZIP)) \
+			ParameterKey=LambdaHandler,ParameterValue=$(LAMBDA_HANDLER).lambda_handler \
+			ParameterKey=SNSTopicName,ParameterValue=mke-trash-pickup \
+			ParameterKey=AddressNumber,ParameterValue=$(ADDRESS_NUM) \
+			ParameterKey=AddressDirection,ParameterValue=$(ADDRESS_DIR) \
+			ParameterKey=StreetName,ParameterValue=$(STREET_NAME) \
+			ParameterKey=StreetType,ParameterValue=$(STREET_TYPE)
+
+.PHONY       : cloud-delete
+cloud-delete :
+	aws cloudformation delete-stack \
+		--stack-name $(STACK_NAME)

@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  DeployBucketName:
+    Type: String
+    Default: mke-trash-pickup
+
+  DeployKeyName:
+    Type: String
+    Default: mke-trash-pickup.zip
+
+  LambdaHandler:
+    Type: String
+    Default: refusereminder.lambda_handler
+
+  SNSTopicName:
+    Type: String
+    Default: mke-trash-pickup
+
+  AddressNumber:
+    Type: String
+
+  AddressDirection:
+    Type: String
+    AllowedValues:
+      - N
+      - S
+      - E
+      - W
+
+  StreetName:
+    Type: String
+
+  StreetType:
+    Type: String
+    Default: ST
+    AllowedValues:
+      - AV
+      - BL
+      - CR
+      - CT
+      - DR
+      - LA
+      - PK
+      - PL
+      - RD
+      - SQ
+      - ST
+      - TR
+      - WY
+
+Resources:
+  DataBucket:
+    Type: 'AWS::S3::Bucket'
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: '/'
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            - s3:PutObject
+            Resource:
+              'Fn::Join':
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: DataBucket
+                  - '/*'
+          - Effect: Allow
+            Action:
+            - sns:Publish
+            Resource:
+              Ref: SNSTopic
+
+  LambdaJob:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler:
+        Ref: LambdaHandler
+      Role:
+        'Fn::GetAtt':
+          - LambdaExecutionRole
+          - Arn
+      Code:
+        S3Bucket:
+          Ref: DeployBucketName
+        S3Key:
+          Ref: DeployKeyName
+      Runtime: python2.7
+      Timeout: 15
+
+  SNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName:
+        Ref: SNSTopicName
