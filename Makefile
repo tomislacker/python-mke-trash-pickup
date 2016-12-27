@@ -19,6 +19,10 @@ venv:
 deps   : venv
 	$(VENV_DIR)/bin/pip$(PIP_VERSION) install -e .
 
+.PHONY  : version
+version : venv
+	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
+
 site-packages :
 	@docker rm -f $(BUILD_CONTAINER_NAME) >&/dev/null || true
 	@docker run \
