@@ -92,11 +92,13 @@ class RefuseQuery(object):
     """Class to parse XHTML response with"""
 
     @classmethod
-    def Execute(cls, refuse_address):
+    def Execute(cls, refuse_address, html_output=None):
         """Queries the form URL & processes the response
 
         :param refuse_address: Address to lookup
         :type refuse_address: RefuseQueryAddress
+        :param html_output: Path to file for debugging HTML output
+        :type html_output: None|str
         :return: Parsed response
         :rtype: mkerefuse.refuse.RefusePickup
         """
@@ -109,5 +111,10 @@ class RefuseQuery(object):
                 'stype': refuse_address.street_type,
                 'Submit': 'Submit',
             })
+
+        if html_output is not None:
+            with open(html_output, 'w') as ofile:
+                ofile.write(response.text)
+
         response_method = getattr(cls.parse_xpath, 'FromHTML')
         return response_method(response.text)
