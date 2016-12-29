@@ -23,19 +23,19 @@ class RefuseQueryAddress(object):
     """Defines an address to query for refuse pickup scheduling"""
 
     STREET_TYPES = [
-        'AV', # Avenue
-        'BL', # Boulevard
-        'CR', # Circle
-        'CT', # Court
-        'DR', # Drive
-        'LA', # Lane
-        'PK', # Parkway
-        'PL', # Place
-        'RD', # Road
-        'SQ', # Square
-        'ST', # Street
-        'TR', # Terrace
-        'WY', # Way
+        'AV',  # Avenue
+        'BL',  # Boulevard
+        'CR',  # Circle
+        'CT',  # Court
+        'DR',  # Drive
+        'LA',  # Lane
+        'PK',  # Parkway
+        'PL',  # Place
+        'RD',  # Road
+        'SQ',  # Square
+        'ST',  # Street
+        'TR',  # Terrace
+        'WY',  # Way
     ]
     """Static list of address suffixes"""
 
