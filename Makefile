@@ -8,9 +8,6 @@ LAMBDA_NAME := check-garbage-day
 LAMBDA_HANDLER := refusereminder
 LAMBDA_FREQ := 12 hours
 
-BUILD_CONTAINER_NAME := mke-trash-pickup_libs
-BUILD_CONTAINER_IMAGE := amazonlinux:latest
-
 
 venv:
 	virtualenv -p python$(PYTHON_VERSION) $(VENV_DIR)
@@ -23,34 +20,9 @@ deps   : venv
 version : venv
 	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
 
-site-packages :
-	@docker rm -f $(BUILD_CONTAINER_NAME) >&/dev/null || true
-	@docker run \
-		-id \
-		-v $(shell pwd):/code:ro \
-		--name $(BUILD_CONTAINER_NAME) \
-		$(BUILD_CONTAINER_IMAGE)
-	@docker exec -it $(BUILD_CONTAINER_NAME) yum install -y \
-		gcc \
-		libxml2-devel \
-		libxslt-devel \
-		python27 \
-		python27-devel \
-		python27-pip
-	@docker exec -it $(BUILD_CONTAINER_NAME) pip install /code
-	@docker cp \
-		$(BUILD_CONTAINER_NAME):/usr/local/lib64/python2.7/$@ \
-		./$@-64
-	@docker cp \
-		$(BUILD_CONTAINER_NAME):/usr/local/lib/python2.7/$@ \
-		./$@
-	@docker rm -f $(BUILD_CONTAINER_NAME)
-
 .PHONY : ldist
 ldist  : site-packages
 	zip -r $(LDIST_ZIP) $(LAMBDA_HANDLER).py mkerefuse -x *.pyc
-	cd site-packages-64 && zip -r $(LDIST_ZIP) *
-	cd site-packages && zip -r $(LDIST_ZIP) *
 
 .PHONY    : s3-bucket
 s3-bucket :
