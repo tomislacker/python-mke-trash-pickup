@@ -2,7 +2,7 @@
 That's what I wanted to know.  And no, I didn't want to go look it up because
 I'm lazy.
 
-[![Build Status](https://travis-ci.org/tomislacker/python-mke-trash-pickup.svg?branch=master)]
+[![Build Status](https://travis-ci.org/tomislacker/python-mke-trash-pickup.svg?branch=master)](https://travis-ci.org/tomislacker/python-mke-trash-pickup)
 
 ## Usage
 ### CloudFormation
