@@ -16,6 +16,10 @@ venv:
 deps   : venv
 	$(VENV_DIR)/bin/pip$(PIP_VERSION) install -e .
 
+.travis.yml : venv
+	@$(VENV_DIR)/bin/pip$(PIP_VERSION) install --quiet tox
+	@$(VENV_DIR)/bin/python make_travisyml.py > $@
+
 .PHONY  : version
 version : venv
 	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
