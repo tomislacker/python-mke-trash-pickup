@@ -14,12 +14,13 @@ Options:
     -s, --street STRING         Street Name (ex: '27th')
     -t, --street-type STRING    Street Type
     -T, --types                 List all Street Types
+
+    --html FILE                 Save the form output HTML for debug
 """
 import logging
 import sys
 from docopt import docopt
 from mkerefuse import __version__
-from mkerefuse.util import LogProducer
 from mkerefuse.util import setup_logging
 setup_logging()
 
@@ -50,7 +51,8 @@ address = RefuseQueryAddress(
 
 # Execute the query
 log.info("Executing query...")
-pickup = RefuseQuery.Execute(address)
+pickup = RefuseQuery.Execute(address,
+                             html_output=args['--html'])
 log.info("Query returned")
 
 # Show the results

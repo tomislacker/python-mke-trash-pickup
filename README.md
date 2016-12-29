@@ -5,10 +5,6 @@ I'm lazy.
 ## Usage
 ### CloudFormation
 
-**Important:** To build the [lxml](http://lxml.de/) library for deployment
-to AWS Lambda, a Docker container will be employed during the `make ldist`
-target.
-
 ```sh
 # Create the S3 bucket, build the code, deploy to S3
 make s3-bucket ldist s3-deploy
@@ -27,6 +23,7 @@ make cloud \
 **Other Variables**
 
 | Name | Default | Description |
+| ---- | ------- | ----------- |
 | `STACK_NAME` | `mke-trash-pickup` | CloudFormation stack name |
 | `DEPLOY_BUCKET` | `mke-trash-pickup-12241` | S3 bucket for .zip deployment (Must be changed) |
 | `LAMBDA_FREQ` | `12 hours` | How often the the scheduled event will check for changes |
@@ -40,30 +37,55 @@ $ mkerefusecheck \
     --direction S \
     --street 27th \
     --street-type st
-2016-04-14 20:23:19 - mke-refuse - DEBUG - Parsing arguments
-2016-04-14 20:23:19 - mke-refuse - DEBUG - Composing query address
-2016-04-14 20:23:19 - mke-refuse - INFO - Executing query...
-2016-04-14 20:23:19 - requests.packages.urllib3.connectionpool - INFO - Starting new HTTP connection (1): mpw.milwaukee.gov
-2016-04-14 20:23:19 - requests.packages.urllib3.connectionpool - DEBUG - "POST /services/garbage_day HTTP/1.1" 200 None
-2016-04-14 20:23:19 - RefusePickup - INFO - Reading through 14152 bytes for 6 properties...
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_after': //*[@id="nConf"]/strong[4]
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'route_recyle': //*[@id="nConf"]/strong[3]
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_before': //*[@id="nConf"]/strong[5]
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'success_msg': //*[@id="nConf"]/h1
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'route_garbage': //*[@id="nConf"]/strong[1]
-2016-04-14 20:23:19 - RefusePickup - DEBUG - Searching for 'next_pickup_garbage': //*[@id="nConf"]/strong[2]
-2016-04-14 20:23:19 - mke-refuse - INFO - Query returned
+2016-12-29 12:50:08 - mke-refuse - DEBUG - Parsing arguments
+2016-12-29 12:50:08 - mke-refuse - DEBUG - Composing query address
+2016-12-29 12:50:08 - mke-refuse - INFO - Executing query...
+2016-12-29 12:50:08 - requests.packages.urllib3.connectionpool - DEBUG - Starting new HTTP connection (1): mpw.milwaukee.gov
+2016-12-29 12:50:08 - requests.packages.urllib3.connectionpool - DEBUG - http://mpw.milwaukee.gov:80 "POST /services/garbage_day HTTP/1.1" 200 None
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Parsing 13813 bytes of HTML
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Searching for 'next_pickup_garbage' with 'The next garbage collection pickup for this location is: <strong>(?P<value>[^<]+)</strong>'
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Searching for 'route_garbage' with 'garbage pickup route for this location is <strong>(?P<value>[^<]+)</strong>'
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_before' with 'The next estimated pickup time is between <strong>(?P<after>[^<]+)</strong> and <strong>(?P<value>[^<]+)</strong>'
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Searching for 'route_recycle' with 'recycling pickup route for this location is <strong>(?P<value>[^<]+)</strong>'
+2016-12-29 12:50:08 - RefusePickup - DEBUG - Searching for 'next_pickup_recycle_after' with 'The next estimated pickup time is between <strong>(?P<value>[^<]+)</strong> and <strong>(?P<before>[^<]+)</strong>'
+2016-12-29 12:50:08 - mke-refuse - INFO - Query returned
 {
-    "next_pickup_recycle_after": "TUESDAY MAY 3, 2016",
-    "route_recyle": "SR01-3-07",
-    "route_garbage": "SP1-3A",
-    "success_msg": "2727 S 27TH ST - Address located!",
-    "next_pickup_recycle_before": "May 9th - May 13th",
-    "next_pickup_garbage": "TUESDAY APRIL 19, 2016"
+    "route_recycle": "NR1-2-3",
+    "next_pickup_garbage": "THURSDAY JANUARY 5, 2017",
+    "route_garbage": "NP1-2A",
+    "next_pickup_recycle_before": "THURSDAY JANUARY 5, 2017",
+    "next_pickup_recycle_after": "WEDNESDAY JANUARY 4, 2017"
 }
 ```
 
 ### Advanced
+
+```python
+In [1]: from mkerefuse.refuse import RefuseQuery
+   ...: from mkerefuse.refuse import RefuseQueryAddress
+   ...:
+   ...: address = RefuseQueryAddress(
+   ...:     house_number='2727',
+   ...:     direction='S',
+   ...:     street_name='27th',
+   ...:     street_type='ST')
+   ...:
+   ...: pickup = RefuseQuery.Execute(address)
+   ...:
+   ...: print("Found garbage route: {}".format(pickup.route_garbage))
+   ...:
+   ...: pickup.to_dict()
+   ...:
+
+Found garbage route: SP1-3A
+Out[1]:
+{'next_pickup_garbage': u'THURSDAY DECEMBER 29, 2016',
+ 'next_pickup_recycle_after': '',
+ 'next_pickup_recycle_before': '',
+ 'route_garbage': u'SP1-3A',
+ 'route_recycle': ''}
+```
+
 *See [Usage.ipynb](Usage.ipynb)*
 
 ### Development Setup
@@ -85,6 +107,10 @@ venv/bin/jupyter notebook
   - **Submit:** Submit
 
 ### Form Response *(XPaths)*
+**Note:** These xpaths are still listed for historical reasons since parsing
+is now done via regex due to issues like
+[#5](https://github.com/tomislacker/python-mke-trash-pickup/issues/5).
+
 - **Success Or Note:** `//*[@id="nConf"]/h1`
 - **Winter Pickup Route:** `//*[@id="nConf"]/strong[1]`
 - **Next Garbage Pickup:** `//*[@id="nConf"]/strong[2]`
@@ -103,5 +129,9 @@ curl \
 
 ## References
 ### Building Libraries for Lambda
+**Note:** These references are still listed for historical reasons since
+parsing is now done via regex due to issues like
+[#5](https://github.com/tomislacker/python-mke-trash-pickup/issues/5).
+
 - [[azavea.com] Using Python's LXML in Amazon Lambda](https://www.azavea.com/blog/2016/06/27/using-python-lxml-amazon-lambda/)
 - [[stackoverflow.com] Use LXML on AWS Lambda](http://stackoverflow.com/questions/36387664/use-lxml-on-aws-lambda)
