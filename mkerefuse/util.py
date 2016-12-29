@@ -1,9 +1,6 @@
-import json
 import logging
 import logging.config
 import os.path
-import yaml
-from lxml import html
 
 
 DEFAULT_LOGGING_CONFIG = {
@@ -26,6 +23,8 @@ def setup_logging(
     config_path = config_path if not config_override else config_override
 
     if os.path.exists(config_path):
+        import yaml
+
         with open(config_path, "rt") as yaml_file:
             config = yaml.load(yaml_file.read())
 
@@ -46,53 +45,3 @@ class LogProducer(object):
         if subname:
             logger_name += " ({})".format(subname)
         self._log = logging.getLogger(logger_name)
-
-
-class XPathObject(LogProducer):
-    """Helper for importing response [X]HTML into a class instance"""
-
-    input_properties = {}
-    """Dict of keys (property names) and XPaths (to read vals from)"""
-
-    @classmethod
-    def FromHTML(cls, html_contents):
-        log = logging.getLogger(cls.__name__)
-        inst = cls()
-        log.info("Reading through {b} bytes for {c} properties...".format(
-            b=len(html_contents),
-            c=len(cls.input_properties)))
-
-        tree = html.fromstring(html_contents)
-
-        for attr_name, xpath in cls.input_properties.items():
-            log.debug("Searching for '{n}': {x}".format(
-                n=attr_name,
-                x=xpath))
-            elements = tree.xpath(xpath)
-
-            if not len(elements):
-                log.warn("Failed to find '{n}': {x}".format(
-                    n=attr_name,
-                    x=xpath))
-                continue
-
-            setattr(
-                inst,
-                attr_name,
-                elements[0].text)
-
-        return inst
-
-    def to_dict(self):
-        response_dict = {}
-        for key, value in self.input_properties.items():
-            response_dict.update({
-                key: getattr(self, key),
-            })
-        return response_dict
-
-    def __repr__(self):
-        return json.dumps(
-            self.to_dict(),
-            indent=4,
-            separators=(',', ': '))

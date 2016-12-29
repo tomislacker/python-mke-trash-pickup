@@ -21,7 +21,6 @@ import logging
 import sys
 from docopt import docopt
 from mkerefuse import __version__
-from mkerefuse.util import LogProducer
 from mkerefuse.util import setup_logging
 setup_logging()
 

@@ -1,22 +1,63 @@
+import json
+import logging
+import re
 import requests
-from .util import XPathObject
+from .util import LogProducer
 
 
-class RefusePickup(XPathObject):
-    """Defines attribute to XPath specification matching"""
+class RefusePickup(LogProducer):
+    """Parses a refuse pickup response"""
 
     input_properties = {
-        'success_msg': '//*[@id="nConf"]/h1',
-        'route_garbage': '//*[@id="nConf"]/strong[1]',
-        'next_pickup_garbage': '//*[@id="nConf"]/strong[2]',
-        'route_recyle': '//*[@id="nConf"]/strong[3]',
-        'next_pickup_recycle_after': '//*[@id="nConf"]/strong[4]',
-        'next_pickup_recycle_before': '//*[@id="nConf"]/strong[5]',
+        'route_garbage': r'garbage pickup route for this location is <strong>(?P<value>[^<]+)</strong>',
+        'next_pickup_garbage': r'The next garbage collection pickup for this location is: <strong>(?P<value>[^<]+)</strong>',
+        'route_recycle': r'recycling pickup route for this location is <strong>(?P<value>[^<]+)</strong>',
+        'next_pickup_recycle_after': r'The next estimated pickup time is between <strong>(?P<value>[^<]+)</strong> and <strong>(?P<before>[^<]+)</strong>',
+        'next_pickup_recycle_before': r'The next estimated pickup time is between <strong>(?P<after>[^<]+)</strong> and <strong>(?P<value>[^<]+)</strong>',
     }
-    """Maps the key to an attr name & value to an XPath lookup"""
+    """Maps the key to an attr name & value to a regex search"""
 
     pickup_time = '0700'
     """Define what time the refuse must be outside by to make pickup time"""
+
+    @classmethod
+    def from_html(cls, html_contents):
+        log = logging.getLogger(cls.__name__)
+
+        log.debug("Parsing {} bytes of HTML".format(len(html_contents)))
+
+        inst = cls()
+        for attr_name, regex in cls.input_properties.items():
+            log.debug("Searching for '{n}' with '{p}'".format(
+                n=attr_name,
+                p=regex
+            ))
+            pattern = re.compile(regex)
+            match = pattern.search(html_contents)
+
+            setattr(inst, attr_name, match.group('value'))
+
+        return inst
+
+    def to_dict(self):
+        """
+        Returns pickup information in a JSON blob
+
+        :return: JSON blob of pickup data
+        :rtype: dict
+        """
+        response_dict = {}
+        for key, value in self.input_properties.items():
+            response_dict.update({
+                key: getattr(self, key),
+            })
+        return response_dict
+
+    def __repr__(self):
+        return json.dumps(
+            self.to_dict(),
+            indent=4,
+            separators=(',', ': '))
 
 
 class RefuseQueryAddress(object):
@@ -116,5 +157,5 @@ class RefuseQuery(object):
             with open(html_output, 'w') as ofile:
                 ofile.write(response.text)
 
-        response_method = getattr(cls.parse_xpath, 'FromHTML')
+        response_method = getattr(cls.parse_xpath, 'from_html')
         return response_method(response.text)
