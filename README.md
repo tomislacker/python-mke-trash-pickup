@@ -59,6 +59,33 @@ $ mkerefusecheck \
 ```
 
 ### Advanced
+
+```python
+In [1]: from mkerefuse.refuse import RefuseQuery
+   ...: from mkerefuse.refuse import RefuseQueryAddress
+   ...:
+   ...: address = RefuseQueryAddress(
+   ...:     house_number='2727',
+   ...:     direction='S',
+   ...:     street_name='27th',
+   ...:     street_type='ST')
+   ...:
+   ...: pickup = RefuseQuery.Execute(address)
+   ...:
+   ...: print("Found garbage route: {}".format(pickup.route_garbage))
+   ...:
+   ...: pickup.to_dict()
+   ...:
+
+Found garbage route: SP1-3A
+Out[1]:
+{'next_pickup_garbage': u'THURSDAY DECEMBER 29, 2016',
+ 'next_pickup_recycle_after': '',
+ 'next_pickup_recycle_before': '',
+ 'route_garbage': u'SP1-3A',
+ 'route_recycle': ''}
+```
+
 *See [Usage.ipynb](Usage.ipynb)*
 
 ### Development Setup
