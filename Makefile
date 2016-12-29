@@ -25,7 +25,7 @@ version : venv
 	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
 
 .PHONY : ldist
-ldist  : site-packages
+ldist  :
 	zip -r $(LDIST_ZIP) $(LAMBDA_HANDLER).py mkerefuse -x *.pyc
 
 .PHONY    : s3-bucket
