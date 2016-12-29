@@ -45,7 +45,6 @@ setup(
 
     install_requires=[
         'docopt',
-        'lxml',
         'pyyaml',
         'requests',
     ],
