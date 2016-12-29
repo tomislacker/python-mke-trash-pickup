@@ -50,5 +50,36 @@ with such.A('successfully fetched response') as it:
                 it.parser.next_pickup_recycle_before,
                 'WEDNESDAY JANUARY 4, 2017')
 
+    with it.having('non-garbage day, unknown recycling'):
+        @it.has_setup
+        def setup():
+            it.parser = setup_parser('tests/data/nongarbageday-recycle_unknown.html')
+
+        @it.should('have the correct garbage route')
+        def test(case):
+            case.assertEqual(
+                it.parser.route_garbage,
+                'SP1-3A')
+
+        @it.should('have the correct recycle route')
+        def test(case):
+            case.assertEqual(
+                it.parser.route_recycle,
+                '')
+
+        @it.should('have the correct next garbage pickup')
+        def test(case):
+            case.assertEqual(
+                it.parser.next_pickup_garbage,
+                'THURSDAY DECEMBER 29, 2016')
+
+        @it.should('have the correct next recycle pickup range')
+        def test(case):
+            case.assertEqual(
+                it.parser.next_pickup_recycle_after,
+                '')
+            case.assertEqual(
+                it.parser.next_pickup_recycle_before,
+                '')
 
 it.createTests(globals())
