@@ -53,7 +53,8 @@ with such.A('successfully fetched response') as it:
     with it.having('non-garbage day, unknown recycling'):
         @it.has_setup
         def setup():
-            it.parser = setup_parser('tests/data/nongarbageday-recycle_unknown.html')
+            it.parser = setup_parser(
+                'tests/data/nongarbageday-recycle_unknown.html')
 
         @it.should('have the correct garbage route')
         def test(case):

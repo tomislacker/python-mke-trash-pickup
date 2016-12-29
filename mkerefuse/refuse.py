@@ -35,7 +35,11 @@ class RefusePickup(LogProducer):
             pattern = re.compile(regex)
             match = pattern.search(html_contents)
 
-            setattr(inst, attr_name, match.group('value'))
+            try:
+                setattr(inst, attr_name, match.group('value'))
+            except AttributeError:
+                # No value was found, by default set an empty string
+                setattr(inst, attr_name, '')
 
         return inst
 
