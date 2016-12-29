@@ -27,6 +27,10 @@ version : venv
 .PHONY : ldist
 ldist  :
 	zip -r $(LDIST_ZIP) $(LAMBDA_HANDLER).py mkerefuse -x *.pyc
+	cd $(VENV_DIR)/lib/python2.7/site-packages \
+		; zip -r $(LDIST_ZIP) \
+			requests \
+			-x *.pyc
 
 .PHONY    : s3-bucket
 s3-bucket :
