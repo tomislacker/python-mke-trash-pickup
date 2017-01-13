@@ -1,7 +1,9 @@
+import dateutil.parser as dateutil_parser
 import json
 import logging
 import re
 import requests
+from datetime import datetime
 from .util import LogProducer
 
 
@@ -18,8 +20,23 @@ class RefusePickup(LogProducer):
     }
     """Maps the key to an attr name & value to a regex search"""
 
+    datetime_properties = [
+        'next_pickup_garbage',
+        'next_pickup_recycle_after',
+        'next_pickup_recycle_before',
+    ]
+
     pickup_time = '0700'
     """Define what time the refuse must be outside by to make pickup time"""
+
+    @classmethod
+    def json_serial(cls, obj):
+        """JSON serializer for objects not serializable by default json code"""
+
+        if isinstance(obj, datetime):
+            serial = obj.isoformat()
+            return serial
+        raise TypeError("Type not serializable")
 
     @classmethod
     def from_html(cls, html_contents):
@@ -37,8 +54,15 @@ class RefusePickup(LogProducer):
             match = pattern.search(html_contents)
 
             try:
-                setattr(inst, attr_name, match.group('value'))
-            except AttributeError:
+                attr_value = match.group('value')
+
+                if attr_name in cls.datetime_properties:
+                    log.critical("Parsing datetime({})".format(attr_name))
+                    attr_value = dateutil_parser.parse(attr_value)
+
+                setattr(inst, attr_name, attr_value)
+            except AttributeError as e:
+                log.error("AttributeError: {}".format(e))
                 # No value was found, by default set an empty string
                 setattr(inst, attr_name, '')
 
@@ -62,7 +86,8 @@ class RefusePickup(LogProducer):
         return json.dumps(
             self.to_dict(),
             indent=4,
-            separators=(',', ': '))
+            separators=(',', ': '),
+            default=self.json_serial)
 
 
 class RefuseQueryAddress(object):
