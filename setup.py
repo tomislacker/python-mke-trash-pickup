@@ -44,6 +44,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
     install_requires=[
+        'python-dateutil',
         'docopt',
         'pyyaml',
         'requests',
