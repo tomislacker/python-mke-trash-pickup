@@ -57,14 +57,18 @@ class RefusePickup(LogProducer):
                 attr_value = match.group('value')
 
                 if attr_name in cls.datetime_properties:
-                    log.critical("Parsing datetime({})".format(attr_name))
+                    log.debug("Parsing datetime({})".format(attr_name))
                     attr_value = dateutil_parser.parse(attr_value)
 
-                setattr(inst, attr_name, attr_value)
             except AttributeError as e:
-                log.error("AttributeError: {}".format(e))
+                log.warning("{t} (failed to match): {e}".format(
+                    t=type(e).__name__,
+                    e=e))
                 # No value was found, by default set an empty string
-                setattr(inst, attr_name, '')
+                attr_value = ''
+
+
+            setattr(inst, attr_name, attr_value)
 
         return inst
 
