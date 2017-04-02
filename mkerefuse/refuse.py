@@ -12,6 +12,7 @@ class RefusePickup(LogProducer):
         'route_garbage': r'garbage pickup route for this location is <strong>(?P<value>[^<]+)</strong>',
         'next_pickup_garbage': r'The next garbage collection pickup for this location is: <strong>(?P<value>[^<]+)</strong>',
         'route_recycle': r'recycling pickup route for this location is <strong>(?P<value>[^<]+)</strong>',
+        'next_pickup_recycle': r'The next recycling collection pickup for this location is:\s*<strong>(?P<value>[^<]+)</strong>',
         'next_pickup_recycle_after': r'The next estimated pickup time is between <strong>(?P<value>[^<]+)</strong> and <strong>(?P<before>[^<]+)</strong>',
         'next_pickup_recycle_before': r'The next estimated pickup time is between <strong>(?P<after>[^<]+)</strong> and <strong>(?P<value>[^<]+)</strong>',
     }
