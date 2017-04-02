@@ -43,14 +43,23 @@ def notify_pickup_change(pickup, sns_topic):
     Produces a notification for a garbage pickup change
     """
 
-    notify_msg = """
-Garbage: {garbage}
-Recycle (After): {recycle_after}
-Recycle (Before): {recycle_before}""".format(
-        garbage=pickup.next_pickup_garbage,
-        recycle_after=pickup.next_pickup_recycle_after,
-        recycle_before=pickup.next_pickup_recycle_before).strip()
+    msg_parts = [
+        "Garbage: " + pickup.next_pickup_garbage,
+    ]
+    if pickup.next_pickup_recycle:
+        # Summer time notification
+        msg_parts += [
+            "Recycle: " + pickup.next_pickup_recycle,
+        ]
 
+    else:
+        # Winter time notification
+        msg_parts += [
+            "Recycle (After): " + pickup.next_pickup_recycle_after,
+            "Recycle (Before): " + pickup.next_pickup_recycle_before
+        ]
+
+    notify_msg = "\n".join(msg_parts)
     print("\n{}\n".format(notify_msg))
 
     print("Notifying SNS: {}".format(sns_topic.arn))
