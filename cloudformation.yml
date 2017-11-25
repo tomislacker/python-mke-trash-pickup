@@ -110,7 +110,7 @@ Resources:
         S3Key:
           Ref: DeployKeyName
       Runtime: python2.7
-      Timeout: 15
+      Timeout: 45
 
   SNSTopic:
     Type: 'AWS::SNS::Topic'
