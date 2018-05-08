@@ -22,6 +22,7 @@ class RefusePickup(LogProducer):
 
     datetime_properties = [
         'next_pickup_garbage',
+        'next_pickup_recycle',
         'next_pickup_recycle_after',
         'next_pickup_recycle_before',
     ]
