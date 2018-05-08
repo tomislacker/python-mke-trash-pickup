@@ -108,13 +108,13 @@ with such.A('successfully fetched response') as it:
         @it.should('have the correct next garbage pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_garbage,
+                it.parser.next_pickup_garbage.isoformat(),
                 '2017-04-14T00:00:00')
 
         @it.should('have the correct next recycle pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_recycle,
+                it.parser.next_pickup_recycle.isoformat(),
                 '2017-04-12T00:00:00')
 
             # Recycle ranges (for Winter) should be empty
