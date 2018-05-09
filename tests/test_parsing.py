@@ -38,17 +38,17 @@ with such.A('successfully fetched response') as it:
         @it.should('have the correct next garbage pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_garbage,
-                'TUESDAY DECEMBER 27, 2016')
+                it.parser.next_pickup_garbage.isoformat(),
+                '2016-12-27T00:00:00')
 
         @it.should('have the correct next recycle pickup range')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_recycle_after,
-                'TUESDAY JANUARY 3, 2017')
+                it.parser.next_pickup_recycle_after.isoformat(),
+                '2017-01-03T00:00:00')
             case.assertEqual(
-                it.parser.next_pickup_recycle_before,
-                'WEDNESDAY JANUARY 4, 2017')
+                it.parser.next_pickup_recycle_before.isoformat(),
+                '2017-01-04T00:00:00')
 
     with it.having('non-garbage day, unknown recycling, in Winter'):
         @it.has_setup
@@ -71,8 +71,8 @@ with such.A('successfully fetched response') as it:
         @it.should('have the correct next garbage pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_garbage,
-                'THURSDAY DECEMBER 29, 2016')
+                it.parser.next_pickup_garbage.isoformat(),
+                '2016-12-29T00:00:00')
 
         @it.should('have the correct next recycle pickup range')
         def test(case):
@@ -108,14 +108,14 @@ with such.A('successfully fetched response') as it:
         @it.should('have the correct next garbage pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_garbage,
-                'FRIDAY APRIL 14, 2017')
+                it.parser.next_pickup_garbage.isoformat(),
+                '2017-04-14T00:00:00')
 
         @it.should('have the correct next recycle pickup')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_recycle,
-                'WEDNESDAY APRIL 12, 2017')
+                it.parser.next_pickup_recycle.isoformat(),
+                '2017-04-12T00:00:00')
 
             # Recycle ranges (for Winter) should be empty
             case.assertEqual(
