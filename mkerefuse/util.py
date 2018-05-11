@@ -2,11 +2,21 @@ import logging
 import logging.config
 import os.path
 
+from datetime import date
+from datetime import datetime
+
 
 DEFAULT_LOGGING_CONFIG = {
     'level': logging.INFO,
     'disable_existing_loggers': False,
 }
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 def setup_logging(

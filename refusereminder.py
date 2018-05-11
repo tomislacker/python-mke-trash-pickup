@@ -7,6 +7,7 @@ import os
 
 from mkerefuse.refuse import RefuseQuery
 from mkerefuse.refuse import RefuseQueryAddress
+from mkerefuse.util import json_serial
 
 
 DEFAULT_SNS_TOPIC = 'mke-trash-pickup'
@@ -20,6 +21,9 @@ DEFAULT_S3_PREFIX = ''
 
 DEFAULT_S3_KEY = 'mke-trash-pickup.json'
 """Default S3 key for persistent data"""
+
+NOTIFY_DATE_FORMAT = '%A %Y-%m-%d'
+"""Format for showing collection dates"""
 
 
 def get_sns_topic_arn(topic_name, aws_region=None, aws_account_num=None):
@@ -44,19 +48,19 @@ def notify_pickup_change(pickup, sns_topic):
     """
 
     msg_parts = [
-        "Garbage: " + pickup.next_pickup_garbage,
+        "Garbage: " + pickup.next_pickup_garbage.strftime(NOTIFY_DATE_FORMAT)
     ]
     if pickup.next_pickup_recycle:
         # Summer time notification
         msg_parts += [
-            "Recycle: " + pickup.next_pickup_recycle,
+            "Recycle: " + pickup.next_pickup_recycle.strftime(NOTIFY_DATE_FORMAT),
         ]
 
     else:
         # Winter time notification
         msg_parts += [
-            "Recycle (After): " + pickup.next_pickup_recycle_after,
-            "Recycle (Before): " + pickup.next_pickup_recycle_before
+            "Recycle (After): " + pickup.next_pickup_recycle_after.strftime(NOTIFY_DATE_FORMAT),
+            "Recycle (Before): " + pickup.next_pickup_recycle_before.strftime(NOTIFY_DATE_FORMAT),
         ]
 
     notify_msg = "\n".join(msg_parts)
@@ -113,7 +117,7 @@ def lambda_handler(event, context):
         print(e)
 
     # Overwrite previous pickup data with the new data
-    s3_object.put(Body=json.dumps(pickup.to_dict()))
+    s3_object.put(Body=json.dumps(pickup.to_dict(), default=json_serial))
 
     # If the information differs, notify of the changes
     if last_data != pickup.to_dict():
