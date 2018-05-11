@@ -1,4 +1,5 @@
 import dateutil.parser as dateutil_parser
+import hashlib
 import json
 import logging
 import re
@@ -159,6 +160,15 @@ class RefuseQueryAddress(object):
     @property
     def street_type(self):
         return self._street_type.upper()
+
+    def get_hash(self, salt=None):
+        md5_obj = hashlib.md5()
+        if salt:
+            md5_obj.update(salt.encode('utf-8'))
+        for parameter in ['house_number', 'direction', '_street_name',
+                '_street_type']:
+            md5_obj.update(getattr(self, parameter).encode('utf-8'))
+        return md5_obj.hexdigest()
 
 
 class RefuseQuery(object):
