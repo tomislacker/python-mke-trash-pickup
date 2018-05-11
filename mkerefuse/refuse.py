@@ -30,6 +30,9 @@ class RefusePickup(LogProducer):
     pickup_time = '0700'
     """Define what time the refuse must be outside by to make pickup time"""
 
+    pickup_tz = 'America/Chicago'
+    """Define what timezone the pickup time is at"""
+
     @classmethod
     def json_serial(cls, obj):
         """JSON serializer for objects not serializable by default json code"""
