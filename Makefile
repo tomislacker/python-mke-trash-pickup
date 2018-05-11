@@ -24,10 +24,6 @@ deps   : venv
 version : venv
 	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
 
-.PHONY : test
-test   : venv
-	$(VENV_DIR)/bin/tox
-
 .PHONY : ldist
 ldist  :
 	zip -r $(LDIST_ZIP) $(LAMBDA_HANDLER).py mkerefuse -x *.pyc
