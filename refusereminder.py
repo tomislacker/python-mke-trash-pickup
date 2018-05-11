@@ -8,6 +8,7 @@ import os
 from mkerefuse.refuse import RefuseQuery
 from mkerefuse.refuse import RefuseQueryAddress
 from mkerefuse.util import json_serial
+from mkerefuse.util import pickup_to_ics
 
 
 DEFAULT_SNS_TOPIC = 'mke-trash-pickup'
@@ -21,6 +22,9 @@ DEFAULT_S3_PREFIX = ''
 
 DEFAULT_S3_KEY = 'mke-trash-pickup.json'
 """Default S3 key for persistent data"""
+
+HASH_SALT = '9B6E3FFC10EBB3001F1A586257C0E886'
+"""Hash salt to hash address with"""
 
 NOTIFY_DATE_FORMAT = '%A %Y-%m-%d'
 """Format for showing collection dates"""
@@ -128,3 +132,14 @@ def lambda_handler(event, context):
             pickup,
             sns_topic=sns.Topic(
                 get_sns_topic_arn(event.get('sns_topic', DEFAULT_SNS_TOPIC))))
+
+        # Determine S3 key to write out an ics file to
+        s3_key = os.path.join(
+            event.get('s3_prefix', DEFAULT_S3_PREFIX),
+            address.get_hash(HASH_SALT) + '.ics')
+        s3_object = s3.Object(s3_bucket, s3_key)
+        s3_object.put(
+            ACL='public-read',
+            Body=pickup_to_ics(address, pickup),
+            CacheControl="max-age=14400",
+        )

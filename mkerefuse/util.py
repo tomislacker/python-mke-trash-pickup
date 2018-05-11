@@ -11,6 +11,7 @@ DEFAULT_LOGGING_CONFIG = {
     'disable_existing_loggers': False,
 }
 
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -55,3 +56,66 @@ class LogProducer(object):
         if subname:
             logger_name += " ({})".format(subname)
         self._log = logging.getLogger(logger_name)
+
+
+def pickup_to_ics(address, pickup):
+    return "\n".join([
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "CALSCALE:GREGORIAN",
+
+        # Garbage event
+        "BEGIN:VEVENT",
+        "SUMMARY:Garbage Pickup",
+        "DTSTART;TZID={tz}:{stamp}".format(
+            tz=pickup.pickup_tz,
+            stamp=pickup.next_pickup_garbage.strftime("%Y%m%dT%H%M%S"),
+        ),
+        "DTEND;TZID={tz}:{stamp}".format(
+            tz=pickup.pickup_tz,
+            stamp=pickup.next_pickup_garbage.strftime("%Y%m%dT%H%M%S"),
+        ),
+        "LOCATION:{}".format(" ".join([
+            address.house_number,
+            address.direction,
+            address.street_name,
+            address.street_type,
+        ])),
+        "DESCRIPTION:Garbage pickup",
+        "STATUS:CONFIRMED",
+        "SEQUENCE:3",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT10M",
+        "DESCRIPTION:Pickup Reminder",
+        "ACTION:DISPLAY",
+        "END:VALARM",
+        "END:VEVENT",
+
+        # Recycle event
+        "BEGIN:VEVENT",
+        "SUMMARY:Recycle Pickup",
+        "DTSTART;TZID={tz}:{stamp}".format(
+            tz=pickup.pickup_tz,
+            stamp=(pickup.next_pickup_recycle_after or pickup.next_pickup_recycle).strftime("%Y%m%dT%H%M%S"),
+        ),
+        "DTEND;TZID={tz}:{stamp}".format(
+            tz=pickup.pickup_tz,
+            stamp=(pickup.next_pickup_recycle_before or pickup.next_pickup_recycle).strftime("%Y%m%dT%H%M%S"),
+        ),
+        "LOCATION:{}".format(" ".join([
+            address.house_number,
+            address.direction,
+            address.street_name,
+            address.street_type,
+        ])),
+        "DESCRIPTION:Recycle pickup",
+        "STATUS:CONFIRMED",
+        "SEQUENCE:3",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT10M",
+        "DESCRIPTION:Pickup Reminder",
+        "ACTION:DISPLAY",
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR",
+    ])
