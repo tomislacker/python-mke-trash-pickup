@@ -1,4 +1,4 @@
-PYTHON_VERSION := 2
+PYTHON_VERSION := 3.6
 PIP_VERSION := $(PYTHON_VERSION)
 VENV_DIR := venv
 LDIST_ZIP := $(shell readlink -m mke-trash-pickup.zip)
@@ -24,16 +24,16 @@ deps   : venv
 version : venv
 	@echo "import mkerefuse; print(mkerefuse.__version__)" | $(VENV_DIR)/bin/python
 
-.PHONY : test
-test   : venv
-	$(VENV_DIR)/bin/tox
-
 .PHONY : ldist
 ldist  :
 	zip -r $(LDIST_ZIP) $(LAMBDA_HANDLER).py mkerefuse -x *.pyc
-	cd $(VENV_DIR)/lib/python2.7/site-packages \
+	cd $(VENV_DIR)/lib/python3.6/site-packages \
 		; zip -r $(LDIST_ZIP) \
+			certifi \
+			chardet \
+			idna \
 			requests \
+			urllib3 \
 			-x *.pyc
 
 .PHONY    : s3-bucket

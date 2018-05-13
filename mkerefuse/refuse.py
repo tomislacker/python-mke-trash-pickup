@@ -1,9 +1,13 @@
 import dateutil.parser as dateutil_parser
+import hashlib
 import json
 import logging
 import re
 import requests
+from datetime import date
 from datetime import datetime
+from datetime import timedelta
+from dateutil import tz
 from .util import LogProducer
 
 
@@ -27,8 +31,14 @@ class RefusePickup(LogProducer):
         'next_pickup_recycle_before',
     ]
 
-    pickup_time = '0700'
+    pickup_offset = {
+        'hours': 8,
+        'minutes': 0,
+    }
     """Define what time the refuse must be outside by to make pickup time"""
+
+    pickup_tz = 'America/Chicago'
+    """Define what timezone the pickup time is at"""
 
     @classmethod
     def json_serial(cls, obj):
@@ -45,6 +55,9 @@ class RefusePickup(LogProducer):
 
         log.debug("Parsing {} bytes of HTML".format(len(html_contents)))
 
+        # Define TZ processing variables
+        to_zone = tz.gettz(cls.pickup_tz)
+
         inst = cls()
         for attr_name, regex in cls.input_properties.items():
             log.debug("Searching for '{n}' with '{p}'".format(
@@ -59,7 +72,9 @@ class RefusePickup(LogProducer):
 
                 if attr_name in cls.datetime_properties:
                     log.debug("Parsing datetime({})".format(attr_name))
-                    attr_value = dateutil_parser.parse(attr_value)
+                    attr_value = dateutil_parser.parse(attr_value) \
+                            .replace(tzinfo=to_zone) \
+                            + timedelta(**cls.pickup_offset)
 
             except AttributeError as e:
                 log.warning("{t} (failed to match): {e}".format(
@@ -82,8 +97,11 @@ class RefusePickup(LogProducer):
         """
         response_dict = {}
         for key, value in self.input_properties.items():
+            key_value = getattr(self, key)
+            if isinstance(key_value, (datetime, date)):
+                key_value = key_value.isoformat()
             response_dict.update({
-                key: getattr(self, key),
+                key: key_value,
             })
         return response_dict
 
@@ -156,6 +174,15 @@ class RefuseQueryAddress(object):
     @property
     def street_type(self):
         return self._street_type.upper()
+
+    def get_hash(self, salt=None):
+        md5_obj = hashlib.md5()
+        if salt:
+            md5_obj.update(salt.encode('utf-8'))
+        for parameter in ['house_number', 'direction', '_street_name',
+                '_street_type']:
+            md5_obj.update(getattr(self, parameter).encode('utf-8'))
+        return md5_obj.hexdigest()
 
 
 class RefuseQuery(object):

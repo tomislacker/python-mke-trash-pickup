@@ -7,6 +7,8 @@ import os
 
 from mkerefuse.refuse import RefuseQuery
 from mkerefuse.refuse import RefuseQueryAddress
+from mkerefuse.util import json_serial
+from mkerefuse.util import pickup_to_ics
 
 
 DEFAULT_SNS_TOPIC = 'mke-trash-pickup'
@@ -20,6 +22,12 @@ DEFAULT_S3_PREFIX = ''
 
 DEFAULT_S3_KEY = 'mke-trash-pickup.json'
 """Default S3 key for persistent data"""
+
+HASH_SALT = '9B6E3FFC10EBB3001F1A586257C0E886'
+"""Hash salt to hash address with"""
+
+NOTIFY_DATE_FORMAT = '%A %Y-%m-%d'
+"""Format for showing collection dates"""
 
 
 def get_sns_topic_arn(topic_name, aws_region=None, aws_account_num=None):
@@ -44,19 +52,19 @@ def notify_pickup_change(pickup, sns_topic):
     """
 
     msg_parts = [
-        "Garbage: " + pickup.next_pickup_garbage,
+        "Garbage: " + pickup.next_pickup_garbage.strftime(NOTIFY_DATE_FORMAT)
     ]
     if pickup.next_pickup_recycle:
         # Summer time notification
         msg_parts += [
-            "Recycle: " + pickup.next_pickup_recycle,
+            "Recycle: " + pickup.next_pickup_recycle.strftime(NOTIFY_DATE_FORMAT),
         ]
 
     else:
         # Winter time notification
         msg_parts += [
-            "Recycle (After): " + pickup.next_pickup_recycle_after,
-            "Recycle (Before): " + pickup.next_pickup_recycle_before
+            "Recycle (After): " + pickup.next_pickup_recycle_after.strftime(NOTIFY_DATE_FORMAT),
+            "Recycle (Before): " + pickup.next_pickup_recycle_before.strftime(NOTIFY_DATE_FORMAT),
         ]
 
     notify_msg = "\n".join(msg_parts)
@@ -113,7 +121,7 @@ def lambda_handler(event, context):
         print(e)
 
     # Overwrite previous pickup data with the new data
-    s3_object.put(Body=json.dumps(pickup.to_dict()))
+    s3_object.put(Body=json.dumps(pickup.to_dict(), default=json_serial))
 
     # If the information differs, notify of the changes
     if last_data != pickup.to_dict():
@@ -124,3 +132,14 @@ def lambda_handler(event, context):
             pickup,
             sns_topic=sns.Topic(
                 get_sns_topic_arn(event.get('sns_topic', DEFAULT_SNS_TOPIC))))
+
+        # Determine S3 key to write out an ics file to
+        s3_key = os.path.join(
+            event.get('s3_prefix', DEFAULT_S3_PREFIX),
+            address.get_hash(HASH_SALT) + '.ics')
+        s3_object = s3.Object(s3_bucket, s3_key)
+        s3_object.put(
+            ACL='public-read',
+            Body=pickup_to_ics(address, pickup),
+            CacheControl="max-age=14400",
+        )
