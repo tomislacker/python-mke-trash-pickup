@@ -109,7 +109,7 @@ Resources:
           Ref: DeployBucketName
         S3Key:
           Ref: DeployKeyName
-      Runtime: python2.7
+      Runtime: python3.6
       Timeout: 45
 
   SNSTopic:
