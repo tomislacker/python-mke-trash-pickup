@@ -1,4 +1,3 @@
-from __future__ import print_function
 from nose2.tools import such
 
 from mkerefuse.refuse import RefusePickup
