@@ -1,5 +1,8 @@
-from __future__ import print_function
+from datetime import timedelta
+from dateutil import tz
 from nose2.tools import such
+
+import dateutil.parser as dateutil_parser
 
 from mkerefuse.refuse import RefusePickup
 
@@ -39,16 +42,31 @@ with such.A('successfully fetched response') as it:
         def test(case):
             case.assertEqual(
                 it.parser.next_pickup_garbage.isoformat(),
-                '2016-12-27T00:00:00')
+                (
+                    dateutil_parser.parse('TUESDAY DECEMBER 27, 2016')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
 
         @it.should('have the correct next recycle pickup range')
         def test(case):
             case.assertEqual(
-                it.parser.next_pickup_recycle_after.isoformat(),
-                '2017-01-03T00:00:00')
-            case.assertEqual(
                 it.parser.next_pickup_recycle_before.isoformat(),
-                '2017-01-04T00:00:00')
+                (
+                    dateutil_parser.parse('WEDNESDAY JANUARY 4 2017')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
+            case.assertEqual(
+                it.parser.next_pickup_recycle_after.isoformat(),
+                (
+                    dateutil_parser.parse('TUESDAY JANUARY 3 2017')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
 
     with it.having('non-garbage day, unknown recycling, in Winter'):
         @it.has_setup
@@ -72,7 +90,12 @@ with such.A('successfully fetched response') as it:
         def test(case):
             case.assertEqual(
                 it.parser.next_pickup_garbage.isoformat(),
-                '2016-12-29T00:00:00')
+                (
+                    dateutil_parser.parse('THURSDAY DECEMBER 29, 2016')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
 
         @it.should('have the correct next recycle pickup range')
         def test(case):
@@ -109,13 +132,23 @@ with such.A('successfully fetched response') as it:
         def test(case):
             case.assertEqual(
                 it.parser.next_pickup_garbage.isoformat(),
-                '2017-04-14T00:00:00')
+                (
+                    dateutil_parser.parse('FRIDAY APRIL 14, 2017')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
 
         @it.should('have the correct next recycle pickup')
         def test(case):
             case.assertEqual(
                 it.parser.next_pickup_recycle.isoformat(),
-                '2017-04-12T00:00:00')
+                (
+                    dateutil_parser.parse('WEDNESDAY APRIL 12, 2017')
+                    .replace(tzinfo=tz.gettz(RefusePickup.pickup_tz))
+                    + timedelta(**RefusePickup.pickup_offset)
+                ).isoformat(),
+            )
 
             # Recycle ranges (for Winter) should be empty
             case.assertEqual(
